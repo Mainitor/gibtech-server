@@ -61,10 +61,10 @@ Look for the `IPv4 Address` (e.g., `192.168.1.25`).
 
 ### On the client PC:
 
-Use the IP address of the server PC in the POST request:
+Use the IP address of the server PC in the POST request (start.json is invalid, stop.json is valid):
 
 ```powershell
-Invoke-RestMethod -Uri http://192.168.1.25:5000 -Method POST -Body (Get-Content -Raw -Path .\\test.json) -ContentType "application/json"
+Invoke-RestMethod -Uri http://192.168.1.25:5000 -Method POST -Body (Get-Content -Raw -Path .\start.json) -ContentType "application/json"
 ```
 
 > 🔒 Ensure port 5000 is allowed through the firewall on the server PC.
