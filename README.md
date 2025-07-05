@@ -21,10 +21,10 @@ Save the `server.ps1` file anywhere on your system (e.g., Desktop).
 
 ### 2. Run the server
 
-Open PowerShell and run the script with:
+Run PowerShell as an Administrator (required!) and execute the script with:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File "C:\\Path\\To\\server.ps1"
+powershell -ExecutionPolicy Bypass -File "C:\Path\To\server.ps1"
 ```
 
 > Replace the path with the location where you saved the file.
