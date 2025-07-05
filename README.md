@@ -31,10 +31,10 @@ powershell -ExecutionPolicy Bypass -File "C:\Path\To\server.ps1"
 
 ### 3. Send a test request
 
-Open a second PowerShell window and run:
+Open a second PowerShell window and run (start.json is invalid, stop.json is valid):
 
 ```powershell
-Invoke-RestMethod -Uri http://localhost:5000 -Method POST -Body (Get-Content -Raw -Path .\\test.json) -ContentType "application/json"
+Invoke-RestMethod -Uri http://localhost:5000 -Method POST -Body (Get-Content -Raw -Path .\test.json) -ContentType "application/json"
 ```
 
 Replace `test.json` with your JSON file containing the payload to test.
