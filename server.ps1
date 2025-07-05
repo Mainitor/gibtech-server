@@ -1,62 +1,56 @@
-$listener = [System.Net.Sockets.TcpListener]::new([Net.IPAddress]::Any, 5000)
-$listener.Start()
-Write-Host "Listening for HTTP POST requests on port 5000..."
+$listener = New-Object System.Net.HttpListener
+$listener.Prefixes.Add("http://+:5000/")
+try {
+    $listener.Start()
+    Write-Host "Listening on http://localhost:5000 ..."
 
-while ($true) {
-    $client = $listener.AcceptTcpClient()
-    $stream = $client.GetStream()
-    $reader = New-Object System.IO.StreamReader($stream, [System.Text.Encoding]::ASCII)
-    $writer = New-Object System.IO.StreamWriter($stream, [System.Text.Encoding]::ASCII)
-    $writer.NewLine = "`r`n"
-    $writer.AutoFlush = $true
-
-    try {
-        # Read headers
-        $requestLines = @()
-        while ($true) {
-            $line = $reader.ReadLine()
-            if ($null -eq $line -or $line -eq "") { break }
-            $requestLines += $line
+    while ($listener.IsListening) {
+        try {
+            $context = $listener.GetContext()
+        } catch {
+            Write-Host "Listener stopped or failed: $_"
+            break
         }
 
-        # Extract Content-Length
-        $contentLength = 0
-        foreach ($line in $requestLines) {
-            if ($line -match "^Content-Length:\s*(\d+)") {
-                $contentLength = [int]$matches[1]
+        $request = $context.Request
+        $response = $context.Response
+
+        try {
+            $reader = New-Object System.IO.StreamReader($request.InputStream)
+            $body = $reader.ReadToEnd()
+            $reader.Close()
+
+            Write-Host "`n=== New Request ==="
+            Write-Host "$($request.HttpMethod) $($request.Url.AbsolutePath)"
+            Write-Host "Body: $body"
+
+            # JSON validation
+            try {
+                $json = $body | ConvertFrom-Json
+                $responseBody = "Valid JSON"
+            } catch {
+                $responseBody = "Invalid JSON: $_"
             }
+
+            $buffer = [System.Text.Encoding]::UTF8.GetBytes($responseBody)
+            $response.ContentLength64 = $buffer.Length
+            $response.ContentType = "text/plain"
+            $response.OutputStream.Write($buffer, 0, $buffer.Length)
         }
-
-        # Read body
-        $body = ""
-        if ($contentLength -gt 0) {
-            $buffer = New-Object byte[] $contentLength
-            $read = 0
-            while ($read -lt $contentLength) {
-                $read += $stream.Read($buffer, $read, $contentLength - $read)
-            }
-            $body = [System.Text.Encoding]::UTF8.GetString($buffer)
+        catch {
+            Write-Host "Error handling request: $_"
         }
-
-        Write-Host "`n=== New Request ==="
-        Write-Host ($requestLines -join "`n")
-        Write-Host "Body: $body"
-
-        # Send response
-        $responseBody = "OK"
-        $response = "HTTP/1.1 200 OK`r`n" +
-                    "Content-Type: text/plain; charset=utf-8`r`n" +
-                    "Content-Length: $([System.Text.Encoding]::UTF8.GetByteCount($responseBody))`r`n" +
-                    "`r`n" +
-                    $responseBody
-        $writer.Write($response)
+        finally {
+            if ($response -ne $null) { $response.Close() }
+        }
     }
-    catch {
-        Write-Host "Error processing request: $_"
-    }
-    finally {
-        $writer.Close()
-        $reader.Close()
-        $client.Close()
+}
+catch {
+    Write-Host "Fatal error starting listener: $_"
+}
+finally {
+    if ($listener -ne $null -and $listener.IsListening) {
+        $listener.Stop()
+        $listener.Close()
     }
 }

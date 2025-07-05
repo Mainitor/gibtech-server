@@ -1,0 +1,10 @@
+{
+  "is_recording": true,
+  "drill_id": "abc",
+  "time": "2025-07-03T13:00:00.000Z",
+  "drill_model": "X-Model",
+  "customer": "Acme Inc"",
+  "free_duration": 30,
+  "locaded_duration": 45,
+  "cycles": 3
+}

@@ -1,0 +1,11 @@
+{
+  "is_recording": false,
+  "pass": true,
+  "rpm_f": 1200,
+  "rpm_l": 1000,
+  "force_f": 300,
+  "force_l": 250,
+  "db_f": 65.5,
+  "db_l": 63.2,
+  "db_total": 70.1
+}
